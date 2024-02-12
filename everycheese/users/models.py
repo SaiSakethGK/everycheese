@@ -8,6 +8,8 @@ class User(AbstractUser):
 
     # First Name and Last Name Do Not Cover Name Patterns
     # Around the Globe.
+    bio = models.TextField("Bio", blank=True)
+
     name = models.CharField(
         _("Name of User"), blank=True, max_length=255
     )
