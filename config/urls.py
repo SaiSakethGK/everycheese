@@ -12,6 +12,11 @@ urlpatterns = [
         name="home",
     ),
     path(
+        'cheeses/',
+        include('everycheese.cheeses.urls',
+                namespace='cheeses'),
+    ),
+    path(
         "about/",
         TemplateView.as_view(template_name="pages/about.html"),
         name="about",
