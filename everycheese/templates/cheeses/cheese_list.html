@@ -2,9 +2,29 @@
 {% block title %}Cheese List{% endblock title %}
 {% block content %}
     <h2>Cheese List</h2>
-<ul>
-    {% for cheese in cheese_list %}
-        <li><a href="{% url 'cheeses:detail' cheese.slug %}">{{ cheese.name }}</a></li>
-    {% endfor %}
-</ul>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Cheese</th>
+                <th scope="col">Country</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cheese in cheese_list %}
+                <tr>
+                    <td><a href="{% url 'cheeses:detail' cheese.slug %}">{{ cheese.name }}</a></td>
+                    <td>{{ cheese.country_of_origin.name|default:"N/A" }} <img src="{{ cheese.country_of_origin.flag }}" /></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr/>
+    <p>Don't see a cheese listed here?</p>
+    <p>
+        <a class="btn btn-primary"
+            href="{% url 'cheeses:add' %}" role="button">
+            Add Cheese
+        </a>
+    </p>
 {% endblock content %}
