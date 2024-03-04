@@ -1,19 +1,22 @@
 {% extends "base.html" %}
 {% block title %}Cheese List{% endblock title %}
 {% block content %}
+    <br>
     <h2>Cheese List</h2>
     <table class="table">
         <thead>
             <tr>
                 <th scope="col">Cheese</th>
                 <th scope="col">Country</th>
+                <th scope="col">Command</th>
             </tr>
         </thead>
         <tbody>
             {% for cheese in cheese_list %}
                 <tr>
-                    <td><a href="{% url 'cheeses:detail' cheese.slug %}">{{ cheese.name }}</a></td>
+                    <td><a href="{% url 'cheeses:detail' cheese.slug %}">{{ cheese.name }} </a></td>
                     <td>{{ cheese.country_of_origin.name|default:"N/A" }} <img src="{{ cheese.country_of_origin.flag }}" /></td>
+                    <td><a href="{% url 'cheeses:delete' cheese.slug %}">Delete</a></td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -22,7 +25,7 @@
     <hr/>
     <p>Don't see a cheese listed here?</p>
     <p>
-        <a class="btn btn-primary"
+        <a class="btn btn-outline-info"
             href="{% url 'cheeses:add' %}" role="button">
             Add Cheese
         </a>

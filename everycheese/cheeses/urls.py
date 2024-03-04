@@ -19,5 +19,7 @@ urlpatterns = [
         view=views.CheeseDetailView.as_view(),
         name='detail'
     ),
+    path('delete/<slug:slug>/', views.CheeseDeleteView.as_view(), name='delete'),
+    path('confirm_delete/<slug:slug>/', views.ConfirmCheeseDeleteView.as_view(), name='confirm_delete'),
     
 ]

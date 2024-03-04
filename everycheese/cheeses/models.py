@@ -20,12 +20,14 @@ class Cheese(TimeStampedModel):
         SEMI_HARD = "semi-hard", "Semi-Hard"
         HARD = "hard", "Hard"
         # Other Fields Here...
+
+    
+    def get_absolute_url(self):
+        return reverse('cheeses:detail', kwargs={"slug": self.slug})
     
     firmness = models.CharField("Firmness", max_length=20, choices=Firmness.choices, default=Firmness.UNSPECIFIED)
 
     def __str__(self):
         return self.name
-    
-    def get_absolute_url(self):
-        return reverse('cheeses:detail', kwargs={"slug": self.slug})
+
 
