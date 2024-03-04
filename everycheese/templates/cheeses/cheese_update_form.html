@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Update Cheese{% endblock title %}
+{% block content %}
+<h1>Update Cheese</h1>
+<form method="post" action="{% url 'cheeses:update' cheese.slug %}">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-outline-info">Update</button>
+</form>
+{% endblock content %}

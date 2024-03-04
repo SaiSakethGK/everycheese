@@ -21,5 +21,5 @@ urlpatterns = [
     ),
     path('delete/<slug:slug>/', views.CheeseDeleteView.as_view(), name='delete'),
     path('confirm_delete/<slug:slug>/', views.ConfirmCheeseDeleteView.as_view(), name='confirm_delete'),
-    
+    path('update/<slug:slug>/', views.CheeseUpdateView.as_view(), name='update'),
 ]

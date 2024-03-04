@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Cheese List{% endblock title %}
 {% block content %}
     <br>
     <h2>Cheese List</h2>
-    <table class="table">
+    <table class="table table-hover">
         <thead>
             <tr>
                 <th scope="col">Cheese</th>
@@ -14,9 +15,12 @@
         <tbody>
             {% for cheese in cheese_list %}
                 <tr>
-                    <td><a href="{% url 'cheeses:detail' cheese.slug %}">{{ cheese.name }} </a></td>
+                    <td><a style="color: #fdc500;" href="{% url 'cheeses:detail' cheese.slug %}">{{ cheese.name }} </a></td>
                     <td>{{ cheese.country_of_origin.name|default:"N/A" }} <img src="{{ cheese.country_of_origin.flag }}" /></td>
-                    <td><a href="{% url 'cheeses:delete' cheese.slug %}">Delete</a></td>
+                    <td>
+                        <a href="{% url 'cheeses:delete' cheese.slug %}" class="badge badge-light" style="color: #ff0a54;">Delete</a> | 
+                        <a href="{% url 'cheeses:update' cheese.slug %}" class="badge badge-light" style="color: #9381ff;">Update</a>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
