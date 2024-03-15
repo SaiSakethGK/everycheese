@@ -1,12 +1,21 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
-
-{% block title %}Add Cheese{% endblock title %}
+{% block title %}
+{{ view.action|default:"Add" }} Cheese
+{% endblock title %}
 {% block content %}
-<h1>Add Cheese</h1>
-<form method="post" action="{% url 'cheeses:add' %}">
-    {% csrf_token %}
-    {{ form|crispy }}
-    <button type="submit" class="btn btn-outline-info">Save</button>
+{% with action=view.action|default:"Add" %}
+<h1>{{ action }} Cheese</h1>
+<form method="post" action=".">
+{% csrf_token %}
+{{ form|crispy }}
+<div class="form-group">
+    <label for="id_rating">Rating:</label>
+    <input type="number" id="id_rating" name="rating" min="0" max="5" value="{{ rating }}" class="form-control">
+</div>
+<button type="submit" class="btn btn-primary">
+{{ action }}
+</button>
 </form>
+{% endwith %}
 {% endblock content %}
