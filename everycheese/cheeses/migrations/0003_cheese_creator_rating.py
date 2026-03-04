@@ -1,0 +1,80 @@
+# Generated migration — Author: Sai Saketh Gooty Kase
+
+import django.core.validators
+import django.db.models.deletion
+from django.conf import settings
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("cheeses", "0002_cheese_country_of_origin"),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name="cheese",
+            name="creator",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="cheeses",
+                to=settings.AUTH_USER_MODEL,
+            ),
+        ),
+        migrations.CreateModel(
+            name="Rating",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "score",
+                    models.PositiveSmallIntegerField(
+                        default=0,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(5),
+                        ],
+                        verbose_name="Score",
+                    ),
+                ),
+                (
+                    "creator",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="ratings",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "cheese",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="ratings",
+                        to="cheeses.cheese",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Rating",
+                "verbose_name_plural": "Ratings",
+            },
+        ),
+        migrations.AlterUniqueTogether(
+            name="rating",
+            unique_together={("creator", "cheese")},
+        ),
+    ]
