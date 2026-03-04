@@ -82,7 +82,7 @@ class TestCheeseDetailView:
         assert response.context["user_rating"] == 0
 
 
-# ── CheeseCreateView ──────────────────────────────────────────────────────────
+# ── CheeseCreateView ─────────────────────────────────────────────────────────
 
 
 class TestCheeseCreateView:
@@ -112,7 +112,7 @@ class TestCheeseCreateView:
         assert cheese.creator == user
 
 
-# ── CheeseUpdateView ──────────────────────────────────────────────────────────
+# ── CheeseUpdateView ─────────────────────────────────────────────────────────
 
 
 class TestCheeseUpdateView:
@@ -160,7 +160,7 @@ class TestCheeseUpdateView:
         assert rating.score == 5
 
 
-# ── CheeseDeleteView ──────────────────────────────────────────────────────────
+# ── CheeseDeleteView ─────────────────────────────────────────────────────────
 
 
 class TestCheeseDeleteView:
@@ -193,7 +193,7 @@ class TestCheeseDeleteView:
         assert response["Location"] == _url("list")
 
 
-# ── RateCheeseView ────────────────────────────────────────────────────────────
+# ── RateCheeseView ───────────────────────────────────────────────────────────
 
 
 class TestRateCheeseView:
