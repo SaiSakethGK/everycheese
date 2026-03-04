@@ -1,136 +1,225 @@
-EveryCheese
-==============================
+# 🧀 EveryCheese
 
-The Ultimate Cheese Index!
+> **The Ultimate Artisan Cheese Index** — a production-grade Django web application
+> with a REST API, community rating system, and a modern dark-mode UI.
 
-### Quick setup
+[![CI](https://github.com/SaiSakethGK/everycheese/actions/workflows/ci.yml/badge.svg)](https://github.com/SaiSakethGK/everycheese/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue.svg)](https://python.org)
+[![Django](https://img.shields.io/badge/django-3.1-green.svg)](https://djangoproject.com)
+[![DRF](https://img.shields.io/badge/DRF-3.14-red.svg)](https://www.django-rest-framework.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./COPYING)
 
-> The next steps assume that conda is already installed
+---
 
-1 - <a name="step-1">Create a conda environment:</a>
+## Features
 
+| Category | Details |
+|---|---|
+| **Cheese CRUD** | Create, read, update, delete with creator-only permissions |
+| **Community Ratings** | 1–5 star ratings; DB-level `Avg()` aggregation (zero Python loops) |
+| **AJAX Rating** | Real-time star picker on detail page via `fetch` POST |
+| **REST API** | Full DRF ViewSet at `/api/v1/`; filterable, searchable, paginated |
+| **OpenAPI Docs** | Auto-generated Swagger UI + ReDoc via `drf-spectacular` |
+| **Search & Filter** | Server-side `Q` filter on name/description + firmness dropdown |
+| **Auth** | `django-allauth` — signup, login, email verification |
+| **Permissions** | `CreatorRequiredMixin` (LoginRequired + UserPassesTest) |
+| **Modern UI** | Bootstrap 5 dark theme, Font Awesome 6, custom CSS design system |
+| **Docker** | Multi-stage build (builder -> slim runtime), non-root user |
+| **CI/CD** | GitHub Actions — lint, Python 3.10/3.11 matrix test, Docker build |
 
-```bash
-conda create python=3.8 -n everycheese
+---
+
+## Architecture
+
 ```
-2 - <a name="step-2">Activate the conda environment</a>
+everycheese/
+├── config/
+│   ├── settings/
+│   │   ├── base.py          # 12-factor settings with django-environ
+│   │   ├── local.py         # dev overrides (debug toolbar, console email)
+│   │   ├── production.py    # HSTS, Redis cache, Anymail, collectfast
+│   │   └── test.py          # SQLite, fast password hasher
+│   └── urls.py              # root URL conf + HomeView with live stats
+│
+├── everycheese/
+│   ├── cheeses/
+│   │   ├── models.py        # Cheese + Rating (DB-level Avg, unique_together)
+│   │   ├── views.py         # CBVs with CreatorRequiredMixin, search, AJAX rate
+│   │   ├── serializers.py   # CheeseSerializer, CheeseDetailSerializer, RatingSerializer
+│   │   ├── api_views.py     # CheeseViewSet (DRF) with /rate/ custom action
+│   │   ├── api_urls.py      # /api/v1/ router + OpenAPI schema endpoints
+│   │   ├── admin.py         # Full ModelAdmin with inline ratings + star display
+│   │   └── tests/
+│   │       ├── factories.py # CheeseFactory, RatingFactory (factory_boy)
+│   │       ├── test_models.py
+│   │       ├── test_views.py
+│   │       └── test_api.py
+│   │
+│   ├── users/               # Custom User model (AbstractUser + bio)
+│   ├── templates/
+│   │   ├── base.html        # Bootstrap 5 navbar, flash messages, footer
+│   │   ├── pages/           # home.html (hero + stats + top-rated), about.html
+│   │   └── cheeses/         # list (card grid + search), detail (AJAX star picker),
+│   │                        # form (crispy BS5), delete (confirmation)
+│   └── static/css/
+│       └── project.css      # Custom design system (CSS variables, dark palette)
+│
+├── Dockerfile               # Multi-stage: builder -> slim runtime, gunicorn
+├── docker-compose.yml       # Postgres 15 + Redis 7 + web with healthchecks
+└── .github/workflows/ci.yml # lint -> test matrix -> docker build
+```
+
+---
+
+## Quick Start
+
+### Option A — Docker (recommended)
 
 ```bash
+git clone https://github.com/SaiSakethGK/everycheese.git
+cd everycheese
+docker compose up
+# In another terminal:
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py createsuperuser
+```
+
+Open **http://localhost:8000** in your browser.
+
+---
+
+### Option B — Local (conda / virtualenv)
+
+**1. Create and activate a Python 3.11 environment**
+
+```bash
+conda create python=3.11 -n everycheese
 conda activate everycheese
 ```
 
-3 - <a name="step-3">Install the project basic dependencies and development dependencies</a>
-
-> Make sure you are inside the root project directory before executing the next commands.
->
-> The root project directory is the directory that contains the `manage.py` file
-
-On Linux and Mac
+**2. Install dependencies**
 
 ```bash
 pip install -r requirements/local.txt
 ```
 
-On Windows
+**3. Configure environment variables**
 
 ```bash
-pip install -r requirements\local.txt
-```
-
-4 - <a name="step-4">Configure the database connection string on the .env</a>
-
-On Linux and Mac
-
-```bash
+# Linux / macOS
 cp env.sample.mac_or_linux .env
-```
 
-On Windows
-
-```bash
+# Windows
 copy env.sample.windows .env
 ```
 
-Change the value of the variable `DATABASE_URL` inside the file` .env` with the information of the database we want to connect.
+Edit `.env` and set `DATABASE_URL` (PostgreSQL) and `DJANGO_SECRET_KEY`.
 
-Note: Several project settings have been configured so that they can be easily manipulated using environment variables or a plain text configuration file, such as the `.env` file.
-This is done with the help of a library called django-environ. We can see the formats expected by `DATABASE_URL` at https://github.com/jacobian/dj-database-url#url-schema. 
-
-5 - <a name="step-5">Use the django-extension's `sqlcreate` management command to help to create the database</a>
-
-On Linux:
-
-```bash
-python manage.py sqlcreate | sudo -u postgres psql -U postgres
-```
-
-On Mac:
-
-```bash
-python manage.py sqlcreate | psql
-```
-
-On Windows:
-
-Since [there is no official support for PostgreSQL 12 on Windows 10](https://www.postgresql.org/download/windows/) (officially PostgreSQL 12 is only supported on Windows Server), we choose to use SQLite3 on Windows
-
-6 - <a name="step-6">Run the `migrations` to finish configuring the database to able to run the project</a>
-
+**4. Apply migrations**
 
 ```bash
 python manage.py migrate
+python manage.py createsuperuser
 ```
 
-
-### <a name="running-tests">Running the tests and coverage test</a>
-
+**5. Start the dev server**
 
 ```bash
+python manage.py runserver
+```
+
+---
+
+## REST API
+
+Base URL: `http://localhost:8000/api/v1/`
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/cheeses/` | — | Paginated list; `?search=`, `?firmness=`, `?ordering=` |
+| `POST` | `/cheeses/` | Yes | Create a new cheese |
+| `GET` | `/cheeses/{slug}/` | — | Detail with nested ratings array |
+| `POST` | `/cheeses/{slug}/rate/` | Yes | Upsert user rating `{"score": 1-5}` |
+| `GET` | `/schema/` | — | Raw OpenAPI 3 schema (YAML) |
+| `GET` | `/docs/` | — | Swagger UI |
+| `GET` | `/redoc/` | — | ReDoc |
+
+**Example — list cheeses filtered by firmness:**
+
+```bash
+curl "http://localhost:8000/api/v1/cheeses/?firmness=soft&ordering=name"
+```
+
+**Example — rate a cheese (authenticated):**
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/cheeses/brie/rate/" \
+     -H "Content-Type: application/json" \
+     -u myuser:mypassword \
+     -d '{"score": 5}'
+# -> {"average": 4.3}
+```
+
+---
+
+## Running Tests
+
+```bash
+# Run all tests with coverage
 coverage run -m pytest
+
+# Coverage report (target >= 70%)
+coverage report -m
+
+# Run a specific test class
+pytest everycheese/cheeses/tests/test_views.py::TestCheeseDeleteView -v
 ```
 
+---
 
-## <a name="troubleshooting">Troubleshooting</a>
+## Key Engineering Decisions
 
-If for some reason you get an error similar to bellow, is because the DATABASE_URL is configured to `postgres:///everycheese` and because of it the generated `DATABASES` settings are configured to connect on PostgreSQL using the socket mode.
-In that case, you must create the database manually because the `sqlcreate` is not capable to correctly generate the SQL query in this case.
+### DB-Level Rating Aggregation
 
-```sql
-ERROR:  syntax error at or near "WITH"
-LINE 1: CREATE USER  WITH ENCRYPTED PASSWORD '' CREATEDB;
-                     ^
-ERROR:  zero-length delimited identifier at or near """"
-LINE 1: CREATE DATABASE everycheese WITH ENCODING 'UTF-8' OWNER "";
-                                                             ^
-ERROR:  syntax error at or near ";"
-LINE 1: GRANT ALL PRIVILEGES ON DATABASE everycheese TO ;
+`Cheese.average_rating` uses `Avg("ratings__score")` — a single SQL query
+regardless of how many ratings exist. The previous implementation used a Python
+`for` loop that fetched every rating row into memory.
+
+```python
+# What this project does
+result = self.ratings.aggregate(avg=Avg("score"))
+return round(result["avg"] or 0.0, 1)
 ```
 
+### N+1 Free List View
 
+`CheeseListView.get_queryset()` annotates once — a constant number of queries
+regardless of result set size:
 
-```sql
-ERROR:  role "myuser" already exists
-ERROR:  database "everycheese" already exists
-GRANT
+```python
+Cheese.objects.select_related("creator") \
+              .annotate(avg_score=Avg("ratings__score"))
 ```
 
-<a name="troubleshooting-delete-database">You can delete the database and the user with the commands below and then [perform step 5 again](#step-5).</a>
+### Creator-Only Permissions
 
-> :warning: **Be very careful here!**: The commands below erase data, and should only be executed on your local development machine and **NEVER** on a production server.
+`CreatorRequiredMixin` composes two built-in Django mixins — no third-party
+permission library needed:
 
-
-On Linux:
-
-```bash
-sudo -u postgres dropdb -U postgres --if-exists everycheese
-sudo -u postgres dropuser -U postgres --if-exists myuser
+```python
+class CreatorRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        cheese = get_object_or_404(Cheese, slug=self.kwargs["slug"])
+        return (
+            cheese.creator == self.request.user
+            or self.request.user.is_staff
+        )
 ```
 
-On Mac:
+---
 
-```bash
-dropdb --if-exists everycheese
-dropuser --if-exists myuser
-```
+## Author
 
+**Sai Saketh Gooty Kase** — Full-Stack Software Engineer
 
+[saisaketh.gootykase@gmail.com](mailto:saisaketh.gootykase@gmail.com)
