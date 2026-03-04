@@ -1,0 +1,61 @@
+# EveryCheese — docker-compose for local development
+# Author: Sai Saketh Gooty Kase
+#
+# Usage:
+#   docker compose up          # start all services
+#   docker compose exec web python manage.py migrate
+#   docker compose exec web python manage.py createsuperuser
+
+version: "3.9"
+
+services:
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: everycheese
+      POSTGRES_USER: everycheese
+      POSTGRES_PASSWORD: everycheese
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U everycheese"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      target: builder          # use the builder stage (has dev deps)
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      DATABASE_URL: postgres://everycheese:everycheese@db:5432/everycheese
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_SECRET_KEY: dev-only-not-for-production
+      DJANGO_DEBUG: "True"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
