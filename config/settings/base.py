@@ -78,10 +78,14 @@ DJANGO_APPS = [
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
+    "crispy_bootstrap5",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "django_countries",
+    "rest_framework",
+    "django_filters",
+    "drf_spectacular",
 ]
 
 LOCAL_APPS = [
@@ -122,19 +126,12 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
+_PV = "django.contrib.auth.password_validation"
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
-    },
+    {"NAME": f"{_PV}.UserAttributeSimilarityValidator"},
+    {"NAME": f"{_PV}.MinimumLengthValidator"},
+    {"NAME": f"{_PV}.CommonPasswordValidator"},
+    {"NAME": f"{_PV}.NumericPasswordValidator"},
 ]
 
 # MIDDLEWARE
@@ -210,7 +207,8 @@ TEMPLATES = [
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 # http://django-crispy-forms.readthedocs.io/en/latest/install.html#template-packs
-CRISPY_TEMPLATE_PACK = "bootstrap4"
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # FIXTURES
 # ------------------------------------------------------------------------------
@@ -288,6 +286,44 @@ ACCOUNT_ADAPTER = "everycheese.users.adapters.AccountAdapter"
 SOCIALACCOUNT_ADAPTER = (
     "everycheese.users.adapters.SocialAccountAdapter"
 )
+
+# Django REST Framework
+# ------------------------------------------------------------------------------
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    ],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ],
+    "DEFAULT_PAGINATION_CLASS": (
+        "rest_framework.pagination.PageNumberPagination"
+    ),
+    "PAGE_SIZE": 20,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# drf-spectacular (OpenAPI)
+# ------------------------------------------------------------------------------
+SPECTACULAR_SETTINGS = {
+    "TITLE": "EveryCheese API",
+    "DESCRIPTION": (
+        "REST API for the EveryCheese cheese catalogue. "
+        "Browse, search, and rate artisan cheeses from around the world."
+    ),
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "CONTACT": {
+        "name": "Sai Saketh Gooty Kase",
+        "email": "saisaketh.gootykase@gmail.com",
+    },
+}
 
 # Your stuff...
 # ------------------------------------------------------------------------------

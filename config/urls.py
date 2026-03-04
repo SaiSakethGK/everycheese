@@ -1,9 +1,15 @@
+"""
+Root URL configuration for EveryCheese.
+
+Author: Sai Saketh Gooty Kase
+"""
+
 from django.conf import settings
-from django.urls import include, path
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.views.generic import TemplateView
+from django.urls import include, path
 from django.views import defaults as default_views
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path(
@@ -12,16 +18,19 @@ urlpatterns = [
         name="home",
     ),
     path(
-        'cheeses/',
-        include('everycheese.cheeses.urls',
-                namespace='cheeses'),
-    ),
-    path(
         "about/",
         TemplateView.as_view(template_name="pages/about.html"),
         name="about",
     ),
-    # Django Admin, use {% url 'admin:index' %}
+    path(
+        "cheeses/",
+        include("everycheese.cheeses.urls", namespace="cheeses"),
+    ),
+    path(
+        "api/v1/",
+        include("everycheese.cheeses.api_urls", namespace="api"),
+    ),
+    # Django Admin
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path(
@@ -29,12 +38,9 @@ urlpatterns = [
         include("everycheese.users.urls", namespace="users"),
     ),
     path("accounts/", include("allauth.urls")),
-    # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
-    # This allows the error pages to be debugged during development, just visit
-    # these url in browser to see how these error pages look like.
     urlpatterns += [
         path(
             "400/",

@@ -2,7 +2,7 @@ pytz==2020.1  # https://github.com/stub42/pytz
 python-slugify==4.0.1  # https://github.com/un33k/python-slugify
 Pillow==7.2.0  # https://github.com/python-pillow/Pillow
 whitenoise==5.2.0  # https://github.com/evansd/whitenoise
-unidecode==1.1.1 # https://pypi.org/project/Unidecode/
+unidecode==1.1.1  # https://pypi.org/project/Unidecode/
 
 # Django
 # ------------------------------------------------------------------------------
@@ -11,5 +11,12 @@ django-environ==0.4.5  # https://github.com/joke2k/django-environ
 django-model-utils==4.0.0  # https://github.com/jazzband/django-model-utils
 django-allauth==0.42.0  # https://github.com/pennersr/django-allauth
 django-crispy-forms==1.9.2  # https://github.com/django-crispy-forms/django-crispy-forms
+crispy-bootstrap5==0.6  # https://github.com/django-crispy-forms/crispy-bootstrap5
 django-autoslug==1.9.8  # https://github.com/justinmayer/django-autoslug/
-django-countries==6.1.2
+django-countries==6.1.2  # https://github.com/SmileyChris/django-countries
+
+# REST API
+# ------------------------------------------------------------------------------
+djangorestframework==3.14.0  # https://www.django-rest-framework.org/
+django-filter==22.1  # https://github.com/carltongibson/django-filter
+drf-spectacular==0.26.5  # https://github.com/tfranzel/drf-spectacular (OpenAPI schema)
