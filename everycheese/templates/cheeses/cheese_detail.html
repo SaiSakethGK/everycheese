@@ -1,19 +1,203 @@
 {% extends "base.html" %}
-{% block title %}Cheeses: {{ cheese.name }}{% endblock title %}
+{% load static %}
+
+{% block title %}{{ cheese.name }} — EveryCheese{% endblock %}
+
 {% block content %}
-<h2>{{ cheese.name }}</h2>
-{% if cheese.firmness %}
-    <p>Firmness:{{ cheese.get_firmness_display }}</p>
-{%endif%}
-{% if cheese.description %}
-    <p>{{ cheese.description }}</p>
+<div class="container ec-section">
+  <div class="row g-4">
+
+    <!-- Left: cheese info -->
+    <div class="col-lg-8">
+      <div class="ec-detail-hero">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+          <ol class="breadcrumb"
+              style="background:transparent;padding:0;font-size:.85rem;">
+            <li class="breadcrumb-item">
+              <a href="{% url 'cheeses:list' %}" class="text-muted-ec">
+                Cheeses
+              </a>
+            </li>
+            <li class="breadcrumb-item text-gold active" aria-current="page">
+              {{ cheese.name }}
+            </li>
+          </ol>
+        </nav>
+
+        <div class="d-flex flex-wrap justify-content-between
+                    align-items-start gap-3 mb-3">
+          <div>
+            <h1 style="font-size:2.2rem;font-weight:800;
+                       letter-spacing:-.5px;margin-bottom:.25rem;">
+              {{ cheese.name }}
+            </h1>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <span class="ec-badge">{{ cheese.get_firmness_display }}</span>
+              {% if cheese.country_of_origin %}
+                <span class="text-muted-ec" style="font-size:.9rem;">
+                  <img src="{{ cheese.country_of_origin.flag }}"
+                       height="14"
+                       alt="{{ cheese.country_of_origin.name }}">
+                  {{ cheese.country_of_origin.name }}
+                </span>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if request.user == cheese.creator or request.user.is_staff %}
+            <div class="d-flex gap-2">
+              <a href="{% url 'cheeses:update' cheese.slug %}"
+                 class="ec-btn-outline">
+                <i class="fa-solid fa-pen fa-xs"></i> Edit
+              </a>
+              <a href="{% url 'cheeses:delete' cheese.slug %}"
+                 class="ec-btn-danger">
+                <i class="fa-solid fa-trash fa-xs"></i> Delete
+              </a>
+            </div>
+          {% endif %}
+        </div>
+
+        {% if cheese.description %}
+          <p style="color:var(--ec-text);line-height:1.75;
+                    font-size:1.05rem;margin-bottom:0;">
+            {{ cheese.description }}
+          </p>
+        {% else %}
+          <p class="text-muted-ec fst-italic">No description yet.</p>
+        {% endif %}
+      </div>
+
+      <!-- Metadata -->
+      <div class="ec-card">
+        <h5 class="fw-bold mb-3">Details</h5>
+        <dl class="row mb-0" style="font-size:.9rem;">
+          <dt class="col-5 text-muted-ec">Firmness</dt>
+          <dd class="col-7">{{ cheese.get_firmness_display }}</dd>
+
+          {% if cheese.country_of_origin %}
+            <dt class="col-5 text-muted-ec">Country</dt>
+            <dd class="col-7">
+              <img src="{{ cheese.country_of_origin.flag }}"
+                   height="13" alt="">
+              {{ cheese.country_of_origin.name }}
+            </dd>
+          {% endif %}
+
+          {% if cheese.creator %}
+            <dt class="col-5 text-muted-ec">Added by</dt>
+            <dd class="col-7">
+              <a href="{% url 'users:detail' cheese.creator.username %}">
+                {{ cheese.creator.username }}
+              </a>
+            </dd>
+          {% endif %}
+
+          <dt class="col-5 text-muted-ec">Added on</dt>
+          <dd class="col-7">{{ cheese.created|date:"N j, Y" }}</dd>
+
+          <dt class="col-5 text-muted-ec">Last updated</dt>
+          <dd class="col-7">{{ cheese.modified|date:"N j, Y" }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- Right: rating panel -->
+    <div class="col-lg-4">
+
+      <!-- Aggregate rating -->
+      <div class="ec-card text-center mb-3">
+        <p class="text-muted-ec mb-1"
+           style="font-size:.85rem;letter-spacing:.5px;text-transform:uppercase;">
+          Community Rating
+        </p>
+        <div style="font-size:3rem;font-weight:800;
+                    color:var(--ec-gold);line-height:1;">
+          {{ cheese.average_rating|floatformat:1 }}
+        </div>
+        <div class="ec-stars justify-content-center my-2"
+             style="font-size:1.4rem;">
+          {% with avg=cheese.average_rating %}
+            {% for i in "12345" %}
+              <span class="ec-star
+                {% if forloop.counter > avg %}empty{% endif %}">★</span>
+            {% endfor %}
+          {% endwith %}
+        </div>
+        <p class="text-muted-ec mb-0" style="font-size:.82rem;">out of 5</p>
+      </div>
+
+      <!-- User rating -->
+      {% if request.user.is_authenticated %}
+        <div class="ec-card">
+          <h6 class="fw-bold mb-3">Your Rating</h6>
+          <div class="star-picker justify-content-center mb-3"
+               id="starPicker"
+               data-url="{% url 'cheeses:rate' cheese.slug %}">
+            {% for i in "54321" %}
+              <input type="radio"
+                     id="star-{{ i }}"
+                     name="rating"
+                     value="{{ i }}"
+                     {% if user_rating == i|add:"0" %}checked{% endif %}>
+              <label for="star-{{ i }}" title="{{ i }} stars">★</label>
+            {% endfor %}
+          </div>
+          <p id="ratingMsg"
+             class="text-muted-ec text-center mb-0"
+             style="font-size:.82rem;min-height:1.2rem;"></p>
+        </div>
+      {% else %}
+        <div class="ec-card text-center">
+          <p class="text-muted-ec mb-3" style="font-size:.9rem;">
+            <a href="{% url 'account_login' %}">Sign in</a>
+            to rate this cheese.
+          </p>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+{{ block.super }}
+{% if request.user.is_authenticated %}
+<script>
+(function () {
+  var picker = document.getElementById('starPicker');
+  var msg    = document.getElementById('ratingMsg');
+  if (!picker) return;
+
+  picker.querySelectorAll('input[type="radio"]').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      var score = parseInt(this.value, 10);
+      fetch(picker.dataset.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ score: score })
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.average !== undefined) {
+          msg.textContent =
+            'Saved! Community avg: ' + data.average.toFixed(1) + '/5';
+        } else {
+          msg.textContent = data.error || 'Something went wrong.';
+        }
+      })
+      .catch(function () {
+        msg.textContent = 'Network error — please try again.';
+      });
+    });
+  });
+}());
+</script>
 {% endif %}
-{% if cheese.country_of_origin %}
-    <p>Country of Origin: {{ cheese.country_of_origin.name }}
-        <img src="{{ cheese.country_of_origin.flag }}" />
-    </p>
-    {% if cheese.average_rating %}
-<p>Rating: {{ cheese.average_rating }}/5</p>
-{% endif %}
- {% endif %}
-{% endblock content %}
+{% endblock %}

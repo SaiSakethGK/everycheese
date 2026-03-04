@@ -1,1 +1,159 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}About — EveryCheese{% endblock %}
+
+{% block content %}
+<div class="container ec-section">
+
+  <!-- Header -->
+  <div class="text-center mb-5">
+    <div class="ec-hero-badge">Open Source Project</div>
+    <h1 class="mt-3" style="font-size:2.8rem; font-weight:800; letter-spacing:-1px;">
+      About <span class="text-gold">EveryCheese</span>
+    </h1>
+    <p class="text-muted-ec" style="max-width:560px;margin:0 auto;font-size:1.1rem;">
+      A production-grade Django application demonstrating modern full-stack
+      engineering — REST APIs, authenticated CRUD, and a community rating system.
+    </p>
+  </div>
+
+  <!-- Architecture cards -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="ec-card">
+        <div class="ec-feature-icon">🏗️</div>
+        <h5 class="fw-bold mb-2">Architecture</h5>
+        <ul class="text-muted-ec ps-3 mb-0" style="font-size:.9rem;line-height:2">
+          <li>Django 3.1 (CBVs + mixins)</li>
+          <li>PostgreSQL with ATOMIC_REQUESTS</li>
+          <li>django-allauth authentication</li>
+          <li>WhiteNoise static file serving</li>
+          <li>12-factor app configuration</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="ec-card">
+        <div class="ec-feature-icon">🔌</div>
+        <h5 class="fw-bold mb-2">REST API</h5>
+        <ul class="text-muted-ec ps-3 mb-0" style="font-size:.9rem;line-height:2">
+          <li>Django REST Framework 3.14</li>
+          <li>OpenAPI 3 via drf-spectacular</li>
+          <li>Swagger UI + ReDoc</li>
+          <li>django-filter for query params</li>
+          <li>Session + Basic auth</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="ec-card">
+        <div class="ec-feature-icon">🧪</div>
+        <h5 class="fw-bold mb-2">Quality &amp; DevOps</h5>
+        <ul class="text-muted-ec ps-3 mb-0" style="font-size:.9rem;line-height:2">
+          <li>pytest + factory_boy fixtures</li>
+          <li>Coverage reporting</li>
+          <li>GitHub Actions CI/CD</li>
+          <li>Docker multi-stage build</li>
+          <li>pre-commit hooks</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="ec-divider">
+
+  <!-- Engineering highlights + API table -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-6">
+      <h3 class="fw-bold mb-3">Engineering Highlights</h3>
+      <div class="d-flex flex-column gap-3">
+        <div class="ec-card">
+          <div class="d-flex gap-3 align-items-start">
+            <span style="font-size:1.4rem">⚡</span>
+            <div>
+              <h6 class="fw-bold mb-1">DB-Level Aggregation</h6>
+              <p class="text-muted-ec mb-0" style="font-size:.88rem">
+                Cheese ratings use <code>Avg()</code> at the ORM layer, not
+                Python loops. Queries are annotated once and reused across
+                list and detail views.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="ec-card">
+          <div class="d-flex gap-3 align-items-start">
+            <span style="font-size:1.4rem">🔒</span>
+            <div>
+              <h6 class="fw-bold mb-1">Creator-Only Permissions</h6>
+              <p class="text-muted-ec mb-0" style="font-size:.88rem">
+                <code>CreatorRequiredMixin</code> combines
+                <code>LoginRequiredMixin</code> and
+                <code>UserPassesTestMixin</code> to enforce ownership at the
+                view layer — no data leaks.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="ec-card">
+          <div class="d-flex gap-3 align-items-start">
+            <span style="font-size:1.4rem">🔍</span>
+            <div>
+              <h6 class="fw-bold mb-1">N+1 Free Queries</h6>
+              <p class="text-muted-ec mb-0" style="font-size:.88rem">
+                List views use <code>select_related</code> for creator and
+                <code>annotate</code> for average score — a single query
+                regardless of result count.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <h3 class="fw-bold mb-3">API Quick Reference</h3>
+      <div class="ec-card">
+        <table class="table table-borderless mb-3 text-muted-ec"
+               style="font-family:monospace;font-size:.85rem">
+          <thead>
+            <tr class="text-gold">
+              <th>Method</th><th>Endpoint</th><th>Auth</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>GET</td><td>/api/v1/cheeses/</td><td>—</td></tr>
+            <tr><td>POST</td><td>/api/v1/cheeses/</td><td>✓</td></tr>
+            <tr><td>GET</td><td>/api/v1/cheeses/{slug}/</td><td>—</td></tr>
+            <tr>
+              <td>POST</td>
+              <td>/api/v1/cheeses/{slug}/rate/</td>
+              <td>✓</td>
+            </tr>
+            <tr><td>GET</td><td>/api/v1/docs/</td><td>—</td></tr>
+          </tbody>
+        </table>
+        <a href="/api/v1/docs/" class="ec-btn" target="_blank">
+          <i class="fa-solid fa-book-open"></i> Full API Docs
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <hr class="ec-divider">
+
+  <!-- Author -->
+  <div class="text-center">
+    <h3 class="fw-bold mb-3">Author</h3>
+    <div class="ec-card d-inline-block px-5 py-4">
+      <div style="font-size:3rem">👨‍💻</div>
+      <h4 class="fw-bold text-gold mt-2 mb-1">Sai Saketh Gooty Kase</h4>
+      <p class="text-muted-ec mb-3">Full-Stack Software Engineer</p>
+      <a href="mailto:saisaketh.gootykase@gmail.com" class="ec-btn-outline">
+        <i class="fa-solid fa-envelope"></i> Contact
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

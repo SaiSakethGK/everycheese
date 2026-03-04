@@ -1,1 +1,149 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}EveryCheese — The Ultimate Artisan Cheese Index{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ──────────────────────────────────────────────────── -->
+<section class="ec-hero">
+  <div class="container">
+    <div class="ec-hero-badge">🌍 Cheeses from Around the World</div>
+    <h1>
+      Discover the World's<br>
+      <span class="highlight">Finest Cheeses</span>
+    </h1>
+    <p class="lead">
+      Community-curated catalogue of artisan cheeses — explore by country,
+      firmness, or flavour. Rate your favourites and add new discoveries.
+    </p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="{% url 'cheeses:list' %}" class="ec-btn">
+        <i class="fa-solid fa-cheese"></i> Browse Cheeses
+      </a>
+      {% if not request.user.is_authenticated %}
+        <a href="{% url 'account_signup' %}" class="ec-btn-outline">
+          <i class="fa-solid fa-user-plus"></i> Join the Community
+        </a>
+      {% else %}
+        <a href="{% url 'cheeses:add' %}" class="ec-btn-outline">
+          <i class="fa-solid fa-plus"></i> Add a Cheese
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Live stats ─────────────────────────────────────────────── -->
+<section class="container">
+  <div class="ec-stats">
+    <div class="ec-stat">
+      <div class="ec-stat-value">{{ stats.cheese_count }}</div>
+      <div class="ec-stat-label">Cheeses Indexed</div>
+    </div>
+    <div class="ec-stat">
+      <div class="ec-stat-value">{{ stats.rating_count }}</div>
+      <div class="ec-stat-label">Community Ratings</div>
+    </div>
+    <div class="ec-stat">
+      <div class="ec-stat-value">{{ stats.country_count }}</div>
+      <div class="ec-stat-label">Countries Represented</div>
+    </div>
+    <div class="ec-stat">
+      <div class="ec-stat-value">{{ stats.contributor_count }}</div>
+      <div class="ec-stat-label">Contributors</div>
+    </div>
+  </div>
+</section>
+
+<hr class="ec-divider container">
+
+<!-- ── Top rated cheeses ─────────────────────────────────────── -->
+{% if featured %}
+<section class="container ec-section">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="ec-section-title">Top Rated Cheeses</h2>
+      <p class="text-muted-ec mb-0">Highest-rated by our community</p>
+    </div>
+    <a href="{% url 'cheeses:list' %}" class="ec-btn-outline">
+      View All <i class="fa-solid fa-arrow-right fa-xs"></i>
+    </a>
+  </div>
+  <div class="row g-3">
+    {% for cheese in featured %}
+      <div class="col-sm-6 col-lg-4">
+        <a href="{{ cheese.get_absolute_url }}" class="text-decoration-none">
+          <div class="ec-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="ec-badge">{{ cheese.get_firmness_display }}</span>
+              <div class="ec-stars" aria-label="{{ cheese.average_rating }} out of 5">
+                {% with avg=cheese.average_rating|floatformat:"0" %}
+                  {% for i in "12345" %}
+                    <span class="ec-star {% if forloop.counter > avg|add:0 %}empty{% endif %}">★</span>
+                  {% endfor %}
+                {% endwith %}
+              </div>
+            </div>
+            <div class="ec-card-title">{{ cheese.name }}</div>
+            <div class="ec-card-meta">
+              {% if cheese.country_of_origin %}
+                <img src="{{ cheese.country_of_origin.flag }}" height="14"
+                     alt="{{ cheese.country_of_origin.name }}">
+                {{ cheese.country_of_origin.name }}
+              {% endif %}
+            </div>
+            <p class="text-muted-ec mb-0" style="font-size:0.88rem; line-height:1.5">
+              {{ cheese.description|truncatewords:18 }}
+            </p>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ── Feature grid ──────────────────────────────────────────── -->
+<section class="container ec-section">
+  <div class="text-center mb-5">
+    <h2 class="ec-section-title">Why EveryCheese?</h2>
+    <p class="text-muted-ec">
+      Everything you need to explore the world of artisan cheese
+    </p>
+  </div>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="ec-card text-center">
+        <div class="ec-feature-icon mx-auto">🌍</div>
+        <h5 class="fw-bold mb-2">Global Coverage</h5>
+        <p class="text-muted-ec mb-0">
+          Discover cheeses from every corner of the world with country flags
+          and origin details baked right in.
+        </p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="ec-card text-center">
+        <div class="ec-feature-icon mx-auto">⭐</div>
+        <h5 class="fw-bold mb-2">Community Ratings</h5>
+        <p class="text-muted-ec mb-0">
+          Rate cheeses 1–5 stars. Averages are computed at the database level
+          with a single <code>Avg()</code> aggregate.
+        </p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="ec-card text-center">
+        <div class="ec-feature-icon mx-auto">🔌</div>
+        <h5 class="fw-bold mb-2">REST API</h5>
+        <p class="text-muted-ec mb-0">
+          Full OpenAPI 3 documented REST API at <code>/api/v1/</code>.
+          Filter, search, paginate — integrate with any client.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

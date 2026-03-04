@@ -1,21 +1,65 @@
 {% extends "base.html" %}
-{% load crispy_forms_tags %}
-{% block title %}
-{{ view.action|default:"Add" }} Cheese
-{% endblock title %}
+{% load crispy_forms_tags static %}
+
+{% block title %}{{ view.action|default:"Add" }} Cheese — EveryCheese{% endblock %}
+
 {% block content %}
-{% with action=view.action|default:"Add" %}
-<h1>{{ action }} Cheese</h1>
-<form method="post" action=".">
-{% csrf_token %}
-{{ form|crispy }}
-<div class="form-group">
-    <label for="id_rating">Rating:</label>
-    <input type="number" id="id_rating" name="rating" min="0" max="5" value="{{ rating }}" class="form-control">
+<div class="container ec-section">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+
+      <!-- Back link + heading -->
+      <div class="mb-4">
+        <a href="{% url 'cheeses:list' %}" class="text-muted-ec"
+           style="font-size:.9rem;">
+          <i class="fa-solid fa-arrow-left fa-xs me-1"></i>
+          Back to catalogue
+        </a>
+        <h1 style="font-size:2rem;font-weight:800;
+                   letter-spacing:-.5px;margin-top:1rem;">
+          {% with action=view.action|default:"Add" %}
+            {{ action }} Cheese
+          {% endwith %}
+        </h1>
+      </div>
+
+      <div class="ec-card ec-form">
+        <form method="post" action=".">
+          {% csrf_token %}
+          {{ form|crispy }}
+
+          <!-- Star rating picker — shown only on Update -->
+          {% if view.action == "Update" %}
+            <div class="mb-3">
+              <label class="form-label">Your Rating</label>
+              <div class="star-picker mt-1"
+                   style="justify-content:flex-start;
+                          flex-direction:row;">
+                {% for i in "12345" %}
+                  <input type="radio"
+                         id="rate-{{ i }}"
+                         name="rating"
+                         value="{{ i }}"
+                         {% if user_rating == i|add:"0" %}checked{% endif %}>
+                  <label for="rate-{{ i }}" title="{{ i }} stars">★</label>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="ec-btn">
+              <i class="fa-solid fa-floppy-disk fa-xs"></i>
+              {% with action=view.action|default:"Add" %}{{ action }}{% endwith %}
+            </button>
+            <a href="{% url 'cheeses:list' %}" class="ec-btn-outline">
+              Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
 </div>
-<button type="submit" class="btn btn-primary">
-{{ action }}
-</button>
-</form>
-{% endwith %}
-{% endblock content %}
+{% endblock %}

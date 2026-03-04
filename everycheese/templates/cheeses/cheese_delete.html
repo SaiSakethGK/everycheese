@@ -1,22 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}Delete Cheese{% endblock title %}
+{% block title %}Delete {{ object.name }} — EveryCheese{% endblock %}
 
 {% block content %}
-    <h2>Delete Cheese</h2>
+<div class="container ec-section">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="ec-card text-center">
 
-        <p>Delete "{{ cheese.name }}"?</p>
+        <div style="font-size:3rem;margin-bottom:1rem;">🗑️</div>
+        <h2 class="fw-bold mb-2">Delete Cheese</h2>
+        <p class="text-muted-ec mb-1">You are about to permanently delete:</p>
+        <p class="text-gold fw-bold" style="font-size:1.2rem;">
+          "{{ object.name }}"
+        </p>
+        <p class="text-muted-ec mb-4" style="font-size:.9rem;">
+          This action <strong>cannot be undone</strong>.
+          All associated ratings will also be removed.
+        </p>
 
-    <form method="post" action="{% url 'cheeses:delete' cheese.slug %}">
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-flex gap-3 justify-content-center">
+            <button type="submit" class="ec-btn-danger">
+              <i class="fa-solid fa-trash fa-xs"></i> Yes, Delete
+            </button>
+            <a href="{{ object.get_absolute_url }}" class="ec-btn-outline">
+              Cancel
+            </a>
+          </div>
+        </form>
 
-        {% csrf_token %}
-
-        <button type="submit" class="btn btn-outline-danger">Delete</button>
-
-        <a href="{% url 'cheeses:list' %}">
-            
-            <button type="button" class="btn btn-outline-success">Cancel</button>
-        </a>
-    </form>
-    
-{% endblock content %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

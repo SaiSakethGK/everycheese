@@ -1,39 +1,195 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Cheese List{% endblock title %}
-{% block content %}
-    <br>
-    <h2>Cheese List</h2>
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th scope="col">Cheese</th>
-                <th scope="col">Country</th>
-                <th scope="col">Command</th>
-                <th>Rating</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for cheese in cheese_list %}
-                <tr>
-                    <td><a style="color: #fdc500;" href="{% url 'cheeses:detail' cheese.slug %}">{{ cheese.name }} </a></td>
-                    <td>{{ cheese.country_of_origin.name|default:"N/A" }} <img src="{{ cheese.country_of_origin.flag }}" /></td>
-                    <td>
-                        <a href="{% url 'cheeses:delete' cheese.slug %}" class="badge badge-light" style="color: #ff0a54;">Delete</a> | 
-                        <a href="{% url 'cheeses:update' cheese.slug %}" class="badge badge-light" style="color: #9381ff;">Update</a>
-                    </td>
-                    <td>{{ cheese.average_rating }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 
-    <hr/>
-    <p>Don't see a cheese listed here?</p>
-    <p>
-        <a class="btn btn-outline-info"
-            href="{% url 'cheeses:add' %}" role="button">
-            Add Cheese
+{% block title %}Cheese Catalogue — EveryCheese{% endblock %}
+
+{% block content %}
+<div class="container ec-section">
+
+  <!-- Page header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 style="font-size:2rem;font-weight:800;letter-spacing:-.5px;">
+        Cheese Catalogue
+      </h1>
+      <p class="text-muted-ec mb-0">
+        {{ paginator.count }}
+        cheese{{ paginator.count|pluralize }} indexed
+        {% if query %}
+          matching <strong class="text-gold">"{{ query }}"</strong>
+        {% endif %}
+      </p>
+    </div>
+    <a href="{% url 'cheeses:add' %}" class="ec-btn">
+      <i class="fa-solid fa-plus fa-xs"></i> Add Cheese
+    </a>
+  </div>
+
+  <!-- Search + filter bar -->
+  <form method="get" action="." class="mb-4">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <div class="ec-search flex-grow-1">
+        <i class="fa-solid fa-magnifying-glass ec-search-icon"></i>
+        <input
+          type="search"
+          name="q"
+          value="{{ query }}"
+          placeholder="Search by name or description…"
+          autocomplete="off">
+      </div>
+      <select name="firmness"
+        class="form-select"
+        style="background:var(--ec-surface);border-color:var(--ec-border);
+               color:var(--ec-text);border-radius:50px;max-width:180px;
+               padding:.65rem 1.2rem;">
+        <option value="">All firmness</option>
+        {% for value, label in firmness_choices %}
+          <option value="{{ value }}"
+            {% if value == selected_firmness %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="ec-btn">
+        <i class="fa-solid fa-filter fa-xs"></i> Filter
+      </button>
+      {% if query or selected_firmness %}
+        <a href="{% url 'cheeses:list' %}" class="ec-btn-outline">
+          <i class="fa-solid fa-xmark fa-xs"></i> Clear
         </a>
-    </p>
-{% endblock content %}
+      {% endif %}
+    </div>
+  </form>
+
+  <!-- Cheese grid -->
+  {% if cheese_list %}
+    <div class="row g-3 mb-4">
+      {% for cheese in cheese_list %}
+        <div class="col-sm-6 col-lg-4">
+          <div class="ec-card">
+            <!-- Header row -->
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="ec-badge">{{ cheese.get_firmness_display }}</span>
+              {% if request.user == cheese.creator or request.user.is_staff %}
+                <div class="d-flex gap-1">
+                  <a href="{% url 'cheeses:update' cheese.slug %}"
+                     class="ec-badge"
+                     style="color:var(--ec-muted);border-color:transparent;"
+                     title="Edit">
+                    <i class="fa-solid fa-pen fa-xs"></i>
+                  </a>
+                  <a href="{% url 'cheeses:delete' cheese.slug %}"
+                     class="ec-badge"
+                     style="color:#ff5050;border-color:transparent;"
+                     title="Delete">
+                    <i class="fa-solid fa-trash fa-xs"></i>
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Name -->
+            <a href="{% url 'cheeses:detail' cheese.slug %}"
+               class="ec-card-title d-block mb-1">
+              {{ cheese.name }}
+            </a>
+
+            <!-- Meta -->
+            <div class="ec-card-meta">
+              {% if cheese.country_of_origin %}
+                <img src="{{ cheese.country_of_origin.flag %}"
+                     height="13"
+                     alt="{{ cheese.country_of_origin.name }}">
+                {{ cheese.country_of_origin.name }}
+                &middot;
+              {% endif %}
+              {% if cheese.creator %}
+                <i class="fa-solid fa-user fa-xs"></i>
+                {{ cheese.creator.username }}
+              {% endif %}
+            </div>
+
+            <!-- Description snippet -->
+            {% if cheese.description %}
+              <p class="text-muted-ec mb-2"
+                 style="font-size:.87rem;line-height:1.5">
+                {{ cheese.description|truncatewords:15 }}
+              </p>
+            {% endif %}
+
+            <!-- Star rating -->
+            <div class="d-flex align-items-center gap-2 mt-2">
+              <div class="ec-stars">
+                {% with avg=cheese.average_rating %}
+                  {% for i in "12345" %}
+                    <span class="ec-star {% if forloop.counter > avg %}empty{% endif %}">
+                      ★
+                    </span>
+                  {% endfor %}
+                {% endwith %}
+              </div>
+              <span class="text-muted-ec" style="font-size:.82rem;">
+                {{ cheese.average_rating|floatformat:1 }}
+              </span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+      <nav aria-label="Cheese pagination">
+        <ul class="pagination justify-content-center gap-1 list-unstyled d-flex flex-wrap">
+          {% if page_obj.has_previous %}
+            <li>
+              <a class="ec-btn-outline py-1 px-3"
+                 href="?q={{ query }}&firmness={{ selected_firmness }}&page={{ page_obj.previous_page_number }}">
+                <i class="fa-solid fa-chevron-left fa-xs"></i>
+              </a>
+            </li>
+          {% endif %}
+          {% for num in paginator.page_range %}
+            {% if page_obj.number == num %}
+              <li><span class="ec-btn py-1 px-3">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+              <li>
+                <a class="ec-btn-outline py-1 px-3"
+                   href="?q={{ query }}&firmness={{ selected_firmness }}&page={{ num }}">
+                  {{ num }}
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <li>
+              <a class="ec-btn-outline py-1 px-3"
+                 href="?q={{ query }}&firmness={{ selected_firmness }}&page={{ page_obj.next_page_number }}">
+                <i class="fa-solid fa-chevron-right fa-xs"></i>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <!-- Empty state -->
+    <div class="text-center py-5">
+      <div style="font-size:4rem;margin-bottom:1rem;">🧀</div>
+      <h3 class="fw-bold mb-2">No cheeses found</h3>
+      <p class="text-muted-ec mb-4">
+        {% if query %}
+          No results for "{{ query }}". Try a different search.
+        {% else %}
+          The catalogue is empty. Be the first to add a cheese!
+        {% endif %}
+      </p>
+      <a href="{% url 'cheeses:add' %}" class="ec-btn">
+        <i class="fa-solid fa-plus"></i> Add the First Cheese
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
