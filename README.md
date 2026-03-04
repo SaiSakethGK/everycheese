@@ -1,210 +1,224 @@
-# 🧀 EveryCheese
+# CheeseAtlas
 
-> **The Ultimate Artisan Cheese Index** — a production-grade Django web application
-> with a REST API, community rating system, and a modern dark-mode UI.
+A full-stack Django platform for cataloguing artisan cheeses, with community ratings and a REST API.
 
 [![CI](https://github.com/SaiSakethGK/everycheese/actions/workflows/ci.yml/badge.svg)](https://github.com/SaiSakethGK/everycheese/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue.svg)](https://python.org)
 [![Django](https://img.shields.io/badge/django-3.1-green.svg)](https://djangoproject.com)
 [![DRF](https://img.shields.io/badge/DRF-3.14-red.svg)](https://www.django-rest-framework.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./COPYING)
 
 ---
 
-## Features
+## Overview
 
-| Category | Details |
-|---|---|
-| **Cheese CRUD** | Create, read, update, delete with creator-only permissions |
-| **Community Ratings** | 1–5 star ratings; DB-level `Avg()` aggregation (zero Python loops) |
-| **AJAX Rating** | Real-time star picker on detail page via `fetch` POST |
-| **REST API** | Full DRF ViewSet at `/api/v1/`; filterable, searchable, paginated |
-| **OpenAPI Docs** | Auto-generated Swagger UI + ReDoc via `drf-spectacular` |
-| **Search & Filter** | Server-side `Q` filter on name/description + firmness dropdown |
-| **Auth** | `django-allauth` — signup, login, email verification |
-| **Permissions** | `CreatorRequiredMixin` (LoginRequired + UserPassesTest) |
-| **Modern UI** | Bootstrap 5 dark theme, Font Awesome 6, custom CSS design system |
-| **Docker** | Multi-stage build (builder -> slim runtime), non-root user |
-| **CI/CD** | GitHub Actions — lint, Python 3.10/3.11 matrix test, Docker build |
+CheeseAtlas is a community-driven cheese catalogue. Users can add cheeses, rate them on a 1–5 scale, filter by country of origin and firmness, and consume the same data through a REST API.
 
----
+**Key capabilities:**
 
-## Architecture
-
-```
-everycheese/
-├── config/
-│   ├── settings/
-│   │   ├── base.py          # 12-factor settings with django-environ
-│   │   ├── local.py         # dev overrides (debug toolbar, console email)
-│   │   ├── production.py    # HSTS, Redis cache, Anymail, collectfast
-│   │   └── test.py          # SQLite, fast password hasher
-│   └── urls.py              # root URL conf + HomeView with live stats
-│
-├── everycheese/
-│   ├── cheeses/
-│   │   ├── models.py        # Cheese + Rating (DB-level Avg, unique_together)
-│   │   ├── views.py         # CBVs with CreatorRequiredMixin, search, AJAX rate
-│   │   ├── serializers.py   # CheeseSerializer, CheeseDetailSerializer, RatingSerializer
-│   │   ├── api_views.py     # CheeseViewSet (DRF) with /rate/ custom action
-│   │   ├── api_urls.py      # /api/v1/ router + OpenAPI schema endpoints
-│   │   ├── admin.py         # Full ModelAdmin with inline ratings + star display
-│   │   └── tests/
-│   │       ├── factories.py # CheeseFactory, RatingFactory (factory_boy)
-│   │       ├── test_models.py
-│   │       ├── test_views.py
-│   │       └── test_api.py
-│   │
-│   ├── users/               # Custom User model (AbstractUser + bio)
-│   ├── templates/
-│   │   ├── base.html        # Bootstrap 5 navbar, flash messages, footer
-│   │   ├── pages/           # home.html (hero + stats + top-rated), about.html
-│   │   └── cheeses/         # list (card grid + search), detail (AJAX star picker),
-│   │                        # form (crispy BS5), delete (confirmation)
-│   └── static/css/
-│       └── project.css      # Custom design system (CSS variables, dark palette)
-│
-├── Dockerfile               # Multi-stage: builder -> slim runtime, gunicorn
-├── docker-compose.yml       # Postgres 15 + Redis 7 + web with healthchecks
-└── .github/workflows/ci.yml # lint -> test matrix -> docker build
-```
+- **CRUD with ownership** — only the cheese creator (or staff) can edit or delete an entry
+- **Community ratings** — per-user scores aggregated at the database level with a single `Avg()` query
+- **REST API** — full DRF ViewSet at `/api/v1/`, documented with OpenAPI 3 (Swagger UI + ReDoc)
+- **Search and filter** — server-side `Q`-filter on name and description, plus firmness dropdown
+- **Authentication** — `django-allauth` with email verification
+- **Dark-mode UI** — Bootstrap 5, Font Awesome 6, custom CSS design system
 
 ---
 
 ## Quick Start
 
-### Option A — Docker (recommended)
+The fastest way to run CheeseAtlas locally is with Docker.
+
+### With Docker
+
+**Prerequisites:** Docker Desktop installed and running.
 
 ```bash
 git clone https://github.com/SaiSakethGK/everycheese.git
 cd everycheese
 docker compose up
-# In another terminal:
+```
+
+In a second terminal, set up the database and create an admin user:
+
+```bash
 docker compose exec web python manage.py migrate
 docker compose exec web python manage.py createsuperuser
 ```
 
 Open **http://localhost:8000** in your browser.
 
----
+### Without Docker
 
-### Option B — Local (conda / virtualenv)
+**Prerequisites:** Python 3.10 or 3.11, PostgreSQL 14+.
 
-**1. Create and activate a Python 3.11 environment**
+1. **Create a virtual environment**
 
-```bash
-conda create python=3.11 -n everycheese
-conda activate everycheese
-```
+   ```bash
+   conda create python=3.11 -n cheeseatlas && conda activate cheeseatlas
+   # or: python -m venv .venv && source .venv/bin/activate
+   ```
 
-**2. Install dependencies**
+2. **Install dependencies**
 
-```bash
-pip install -r requirements/local.txt
-```
+   ```bash
+   pip install -r requirements/local.txt
+   ```
 
-**3. Configure environment variables**
+3. **Set environment variables**
 
-```bash
-# Linux / macOS
-cp env.sample.mac_or_linux .env
+   Copy the sample file and edit `DATABASE_URL` and `DJANGO_SECRET_KEY`:
 
-# Windows
-copy env.sample.windows .env
-```
+   ```bash
+   # macOS / Linux
+   cp env.sample.mac_or_linux .env
 
-Edit `.env` and set `DATABASE_URL` (PostgreSQL) and `DJANGO_SECRET_KEY`.
+   # Windows
+   copy env.sample.windows .env
+   ```
 
-**4. Apply migrations**
+4. **Apply migrations and start the server**
 
-```bash
-python manage.py migrate
-python manage.py createsuperuser
-```
-
-**5. Start the dev server**
-
-```bash
-python manage.py runserver
-```
+   ```bash
+   python manage.py migrate
+   python manage.py createsuperuser
+   python manage.py runserver
+   ```
 
 ---
 
-## REST API
+## How-to Guides
 
-Base URL: `http://localhost:8000/api/v1/`
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `GET` | `/cheeses/` | — | Paginated list; `?search=`, `?firmness=`, `?ordering=` |
-| `POST` | `/cheeses/` | Yes | Create a new cheese |
-| `GET` | `/cheeses/{slug}/` | — | Detail with nested ratings array |
-| `POST` | `/cheeses/{slug}/rate/` | Yes | Upsert user rating `{"score": 1-5}` |
-| `GET` | `/schema/` | — | Raw OpenAPI 3 schema (YAML) |
-| `GET` | `/docs/` | — | Swagger UI |
-| `GET` | `/redoc/` | — | ReDoc |
-
-**Example — list cheeses filtered by firmness:**
+### Run the test suite
 
 ```bash
-curl "http://localhost:8000/api/v1/cheeses/?firmness=soft&ordering=name"
+coverage run -m pytest          # run all tests
+coverage report -m              # show coverage by file
 ```
 
-**Example — rate a cheese (authenticated):**
+The test suite covers models, views (including permission enforcement), and API endpoints. Coverage target is 70%.
+
+### Use the REST API
+
+All endpoints are browsable at `/api/v1/docs/` (Swagger UI) or `/api/v1/redoc/`.
+
+**List cheeses** — supports `?search=`, `?firmness=`, `?ordering=`, `?page=`:
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/cheeses/brie/rate/" \
+curl http://localhost:8000/api/v1/cheeses/?firmness=soft&ordering=name
+```
+
+**Create a cheese** (authenticated):
+
+```bash
+curl -X POST http://localhost:8000/api/v1/cheeses/ \
+     -H "Content-Type: application/json" \
+     -u myuser:mypassword \
+     -d '{"name": "Gouda", "firmness": "semi-hard", "country_of_origin": "NL"}'
+```
+
+**Rate a cheese** — upserts the calling user's rating:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/cheeses/gouda/rate/ \
      -H "Content-Type: application/json" \
      -u myuser:mypassword \
      -d '{"score": 5}'
-# -> {"average": 4.3}
+# {"average": 4.3}
 ```
 
----
+### Deploy to production
 
-## Running Tests
+Set these environment variables before starting the server:
+
+| Variable | Description |
+|---|---|
+| `DJANGO_SECRET_KEY` | A long random string |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `REDIS_URL` | Redis connection string (for caching) |
+| `DJANGO_ALLOWED_HOSTS` | Comma-separated list of domains |
+| `MAILGUN_API_KEY` | Mailgun key for transactional email |
+
+Run the production Docker image:
 
 ```bash
-# Run all tests with coverage
-coverage run -m pytest
-
-# Coverage report (target >= 70%)
-coverage report -m
-
-# Run a specific test class
-pytest everycheese/cheeses/tests/test_views.py::TestCheeseDeleteView -v
+docker build --target runtime -t cheeseatlas:latest .
+docker run -p 8000:8000 --env-file .env cheeseatlas:latest
 ```
 
 ---
 
-## Key Engineering Decisions
+## Reference
 
-### DB-Level Rating Aggregation
+### API endpoints
 
-`Cheese.average_rating` uses `Avg("ratings__score")` — a single SQL query
-regardless of how many ratings exist. The previous implementation used a Python
-`for` loop that fetched every rating row into memory.
+| Method | Endpoint | Auth required | Description |
+|--------|----------|:---:|-------------|
+| GET | `/api/v1/cheeses/` | No | Paginated, filterable list |
+| POST | `/api/v1/cheeses/` | Yes | Create a cheese |
+| GET | `/api/v1/cheeses/{slug}/` | No | Detail with nested ratings |
+| PUT / PATCH | `/api/v1/cheeses/{slug}/` | Staff | Update a cheese |
+| DELETE | `/api/v1/cheeses/{slug}/` | Staff | Delete a cheese |
+| POST | `/api/v1/cheeses/{slug}/rate/` | Yes | Upsert a rating (score 1–5) |
+| GET | `/api/v1/docs/` | No | Swagger UI |
+| GET | `/api/v1/redoc/` | No | ReDoc |
+| GET | `/api/v1/schema/` | No | Raw OpenAPI 3 schema |
+
+### Query parameters (GET /api/v1/cheeses/)
+
+| Parameter | Example | Description |
+|---|---|---|
+| `search` | `?search=gouda` | Matches name or description |
+| `firmness` | `?firmness=soft` | Filter by firmness |
+| `country_of_origin` | `?country_of_origin=FR` | Filter by ISO country code |
+| `ordering` | `?ordering=-created` | Sort field (prefix `-` for descending) |
+| `page` | `?page=2` | Page number (20 results per page) |
+
+### Data models
+
+**Cheese**
+
+| Field | Type | Notes |
+|---|---|---|
+| `name` | CharField | Max 255 characters |
+| `slug` | AutoSlugField | Auto-generated from name, unique |
+| `description` | TextField | Optional |
+| `country_of_origin` | CountryField | ISO 3166-1 alpha-2 |
+| `firmness` | CharField | `unspecified`, `soft`, `semi-soft`, `semi-hard`, `hard` |
+| `creator` | ForeignKey(User) | Set automatically on create |
+| `created` / `modified` | DateTimeField | Auto-managed timestamps |
+
+**Rating**
+
+| Field | Type | Notes |
+|---|---|---|
+| `score` | PositiveSmallIntegerField | 0–5; unique per (creator, cheese) pair |
+| `creator` | ForeignKey(User) | |
+| `cheese` | ForeignKey(Cheese) | |
+
+### Configuration
+
+All settings are read from environment variables via `django-environ`. See `env.sample.mac_or_linux` for a full list.
+
+---
+
+## Explanation
+
+### Why DB-level rating aggregation?
+
+`Cheese.average_rating` runs a single SQL `AVG()` query:
 
 ```python
-# What this project does
 result = self.ratings.aggregate(avg=Avg("score"))
 return round(result["avg"] or 0.0, 1)
 ```
 
-### N+1 Free List View
+This is constant-time regardless of how many ratings exist. The previous approach fetched every rating row into Python memory and looped — O(n) in both time and memory.
 
-`CheeseListView.get_queryset()` annotates once — a constant number of queries
-regardless of result set size:
+The list view takes this further by annotating the queryset once, so all 12 cards on a page share a single aggregation query rather than triggering one per card.
 
-```python
-Cheese.objects.select_related("creator") \
-              .annotate(avg_score=Avg("ratings__score"))
-```
+### Why `CreatorRequiredMixin`?
 
-### Creator-Only Permissions
-
-`CreatorRequiredMixin` composes two built-in Django mixins — no third-party
-permission library needed:
+Django provides `LoginRequiredMixin` (redirect unauthenticated users) and `UserPassesTestMixin` (run an arbitrary test and return 403 on failure). Composing them is more explicit and testable than a custom decorator:
 
 ```python
 class CreatorRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -216,10 +230,23 @@ class CreatorRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
         )
 ```
 
+Any non-creator hitting an update or delete URL receives a `403 Forbidden` — no data is modified.
+
+### Project structure
+
+```
+everycheese/
+├── config/              # Django settings (base / local / production / test)
+├── everycheese/
+│   ├── cheeses/         # Core app — models, views, API, admin, tests
+│   ├── users/           # Custom User model (AbstractUser + bio)
+│   ├── templates/       # Django templates (Bootstrap 5)
+│   └── static/css/      # Custom design system
+├── Dockerfile           # Multi-stage build (builder → slim runtime)
+├── docker-compose.yml   # Local dev stack (Postgres + Redis + app)
+└── .github/workflows/   # CI: lint → test matrix → Docker build
+```
+
 ---
 
-## Author
-
-**Sai Saketh Gooty Kase** — Full-Stack Software Engineer
-
-[saisaketh.gootykase@gmail.com](mailto:saisaketh.gootykase@gmail.com)
+**Author:** Sai Saketh Gooty Kase — [saisaketh.gootykase@gmail.com](mailto:saisaketh.gootykase@gmail.com)
