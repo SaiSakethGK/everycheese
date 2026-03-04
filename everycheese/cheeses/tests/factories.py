@@ -1,8 +1,4 @@
-"""
-Test factories for the cheeses app.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""Test factories for the cheeses app."""
 
 import factory
 import factory.fuzzy

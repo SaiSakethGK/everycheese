@@ -1,8 +1,4 @@
-"""
-Admin configuration for the EveryCheese cheese catalogue.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""Admin configuration for the CheeseAtlas cheese catalogue."""
 
 from django.contrib import admin
 from django.db.models import Avg

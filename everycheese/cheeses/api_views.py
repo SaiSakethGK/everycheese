@@ -1,8 +1,4 @@
-"""
-Django REST Framework API views for the EveryCheese cheese catalogue.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""Django REST Framework API views for the CheeseAtlas cheese catalogue."""
 
 import logging
 

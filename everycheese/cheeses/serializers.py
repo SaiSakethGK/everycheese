@@ -1,8 +1,4 @@
-"""
-DRF serializers for the EveryCheese cheese catalogue.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""DRF serializers for the CheeseAtlas cheese catalogue."""
 
 from rest_framework import serializers
 

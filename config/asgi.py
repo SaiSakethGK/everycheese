@@ -1,5 +1,5 @@
 """
-ASGI config for EveryCheese project.
+ASGI config for CheeseAtlas project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

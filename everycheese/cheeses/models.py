@@ -1,8 +1,4 @@
-"""
-Cheese models for the EveryCheese application.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""Cheese models for the CheeseAtlas application."""
 
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -17,7 +13,7 @@ from model_utils.models import TimeStampedModel
 
 class Cheese(TimeStampedModel):
     """
-    Represents a cheese in the EveryCheese index.
+    Represents a cheese in the CheeseAtlas index.
 
     Stores descriptive metadata, geographic origin, and texture firmness.
     Ratings are stored separately in the Rating model and aggregated at

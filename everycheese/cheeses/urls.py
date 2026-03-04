@@ -1,8 +1,4 @@
-"""
-URL configuration for the EveryCheese cheese catalogue.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""URL configuration for the CheeseAtlas cheese catalogue."""
 
 from django.urls import path
 

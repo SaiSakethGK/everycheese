@@ -1,8 +1,4 @@
-"""
-Unit tests for the Cheese and Rating models.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""Unit tests for the Cheese and Rating models."""
 
 import pytest
 from django.db import IntegrityError

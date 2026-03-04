@@ -1,5 +1,5 @@
 # ──────────────────────────────────────────────────────────────────────────────
-# EveryCheese — Multi-stage Dockerfile
+# CheeseAtlas — Multi-stage Dockerfile
 # Author: Sai Saketh Gooty Kase
 #
 # Stage 1 (builder) — install Python deps into a virtual environment.
@@ -28,8 +28,8 @@ RUN pip install --upgrade pip \
 FROM python:3.11-slim AS runtime
 
 LABEL maintainer="Sai Saketh Gooty Kase <saisaketh.gootykase@gmail.com>"
-LABEL org.opencontainers.image.title="EveryCheese"
-LABEL org.opencontainers.image.description="The Ultimate Artisan Cheese Index"
+LABEL org.opencontainers.image.title="CheeseAtlas"
+LABEL org.opencontainers.image.description="Artisan cheese catalogue with REST API and community ratings"
 
 # Runtime-only system deps (libpq for psycopg2, etc.)
 RUN apt-get update && apt-get install -y --no-install-recommends \

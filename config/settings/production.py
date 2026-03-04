@@ -95,7 +95,7 @@ TEMPLATES[-1]["OPTIONS"]["loaders"] = [  # type: ignore[index] # noqa: F405
 # https://docs.djangoproject.com/en/dev/ref/settings/#default-from-email
 DEFAULT_FROM_EMAIL = env(
     "DJANGO_DEFAULT_FROM_EMAIL",
-    default="EveryCheese <noreply@everycheese.com>",
+    default="CheeseAtlas <noreply@everycheese.com>",
 )
 # https://docs.djangoproject.com/en/dev/ref/settings/#server-email
 SERVER_EMAIL = env(
@@ -103,7 +103,7 @@ SERVER_EMAIL = env(
 )
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-subject-prefix
 EMAIL_SUBJECT_PREFIX = env(
-    "DJANGO_EMAIL_SUBJECT_PREFIX", default="[EveryCheese]"
+    "DJANGO_EMAIL_SUBJECT_PREFIX", default="[CheeseAtlas]"
 )
 
 # ADMIN

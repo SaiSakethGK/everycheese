@@ -1,8 +1,4 @@
-"""
-Root URL configuration for EveryCheese.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""Root URL configuration for CheeseAtlas."""
 
 from django.conf import settings
 from django.conf.urls.static import static

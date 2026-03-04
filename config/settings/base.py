@@ -312,9 +312,9 @@ REST_FRAMEWORK = {
 # drf-spectacular (OpenAPI)
 # ------------------------------------------------------------------------------
 SPECTACULAR_SETTINGS = {
-    "TITLE": "EveryCheese API",
+    "TITLE": "CheeseAtlas API",
     "DESCRIPTION": (
-        "REST API for the EveryCheese cheese catalogue. "
+        "REST API for the CheeseAtlas cheese catalogue. "
         "Browse, search, and rate artisan cheeses from around the world."
     ),
     "VERSION": "1.0.0",

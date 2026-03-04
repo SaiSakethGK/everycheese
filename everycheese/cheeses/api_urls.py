@@ -1,8 +1,4 @@
-"""
-API URL configuration for the EveryCheese REST API.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""API URL configuration for the CheeseAtlas REST API."""
 
 from django.urls import include, path
 from drf_spectacular.views import (

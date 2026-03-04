@@ -1,8 +1,4 @@
-"""
-Views for the EveryCheese cheese catalogue.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""Views for the CheeseAtlas cheese catalogue."""
 
 import json
 import logging

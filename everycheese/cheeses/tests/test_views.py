@@ -1,8 +1,4 @@
-"""
-Integration tests for cheese CRUD views and the AJAX rating endpoint.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""Integration tests for cheese CRUD views and the AJAX rating endpoint."""
 
 import json
 

@@ -1,8 +1,4 @@
-"""
-Integration tests for the DRF REST API endpoints.
-
-Author: Sai Saketh Gooty Kase
-"""
+"""Integration tests for the DRF REST API endpoints."""
 
 import pytest
 from django.urls import reverse
