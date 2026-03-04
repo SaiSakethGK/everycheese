@@ -1,13 +1,335 @@
-/* These styles are generated from project.scss. */
+/*
+ * EveryCheese — Custom Design System
+ * Author: Sai Saketh Gooty Kase
+ *
+ * Palette
+ *   --ec-gold   : #E8A838  (cheese amber)
+ *   --ec-dark   : #1C1C2E  (deep navy)
+ *   --ec-surface: #252540  (card surface)
+ *   --ec-muted  : #8888AA  (secondary text)
+ */
 
-.alert-debug {
-  color: black;
-  background-color: white;
-  border-color: #d6e9c6;
+/* ─── CSS variables ─────────────────────────────────────────── */
+:root {
+  --ec-gold: #E8A838;
+  --ec-gold-hover: #F5C04A;
+  --ec-dark: #1C1C2E;
+  --ec-surface: #252540;
+  --ec-surface-2: #2E2E50;
+  --ec-muted: #8888AA;
+  --ec-text: #E8E8F0;
+  --ec-border: rgba(232, 168, 56, 0.25);
+  --ec-radius: 12px;
+  --ec-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
-.alert-error {
-  color: #b94a48;
-  background-color: #f2dede;
-  border-color: #eed3d7;
+/* ─── Global ────────────────────────────────────────────────── */
+html, body {
+  background-color: var(--ec-dark);
+  color: var(--ec-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+a { color: var(--ec-gold); text-decoration: none; }
+a:hover { color: var(--ec-gold-hover); }
+
+/* ─── Navbar ────────────────────────────────────────────────── */
+.ec-navbar {
+  background: rgba(28, 28, 46, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ec-border);
+  padding: 0.75rem 0;
+}
+.ec-navbar .navbar-brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ec-gold) !important;
+  letter-spacing: -0.5px;
+}
+.ec-navbar .nav-link {
+  color: var(--ec-muted) !important;
+  font-weight: 500;
+  transition: color 0.2s;
+  padding: 0.4rem 0.8rem !important;
+}
+.ec-navbar .nav-link:hover,
+.ec-navbar .nav-link.active { color: var(--ec-gold) !important; }
+.ec-btn-nav {
+  background: var(--ec-gold);
+  color: #1C1C2E !important;
+  border-radius: 8px;
+  padding: 0.35rem 1rem !important;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.15s;
+}
+.ec-btn-nav:hover {
+  background: var(--ec-gold-hover) !important;
+  color: #1C1C2E !important;
+  transform: translateY(-1px);
+}
+
+/* ─── Hero ──────────────────────────────────────────────────── */
+.ec-hero {
+  padding: 5rem 0 4rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.ec-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    rgba(232, 168, 56, 0.12),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+.ec-hero-badge {
+  display: inline-block;
+  background: rgba(232, 168, 56, 0.15);
+  border: 1px solid var(--ec-border);
+  color: var(--ec-gold);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 0.3rem 1rem;
+  border-radius: 50px;
+  margin-bottom: 1.5rem;
+}
+.ec-hero h1 {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+  letter-spacing: -1.5px;
+}
+.ec-hero h1 .highlight { color: var(--ec-gold); }
+.ec-hero p.lead {
+  color: var(--ec-muted);
+  font-size: 1.2rem;
+  max-width: 540px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.6;
+}
+
+/* ─── Stats bar ─────────────────────────────────────────────── */
+.ec-stats {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 3rem 0;
+}
+.ec-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--ec-gold);
+  line-height: 1;
+}
+.ec-stat-label {
+  font-size: 0.8rem;
+  color: var(--ec-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.25rem;
+}
+
+/* ─── Cards ─────────────────────────────────────────────────── */
+.ec-card {
+  background: var(--ec-surface);
+  border: 1px solid var(--ec-border);
+  border-radius: var(--ec-radius);
+  padding: 1.5rem;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  height: 100%;
+}
+.ec-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--ec-gold);
+  box-shadow: var(--ec-shadow);
+}
+.ec-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ec-text);
+  margin-bottom: 0.5rem;
+}
+.ec-card-meta {
+  font-size: 0.82rem;
+  color: var(--ec-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+.ec-badge {
+  display: inline-block;
+  background: rgba(232, 168, 56, 0.15);
+  color: var(--ec-gold);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 50px;
+  border: 1px solid var(--ec-border);
+}
+
+/* ─── Star rating ───────────────────────────────────────────── */
+.ec-stars { display: inline-flex; gap: 2px; }
+.ec-star { color: var(--ec-gold); font-size: 1rem; }
+.ec-star.empty { color: var(--ec-surface-2); }
+
+/* Interactive star picker */
+.star-picker { display: inline-flex; flex-direction: row-reverse; gap: 4px; }
+.star-picker input[type="radio"] { display: none; }
+.star-picker label {
+  font-size: 1.6rem;
+  color: var(--ec-surface-2);
+  cursor: pointer;
+  transition: color 0.15s, transform 0.15s;
+}
+.star-picker label:hover,
+.star-picker label:hover ~ label,
+.star-picker input:checked ~ label { color: var(--ec-gold); }
+.star-picker label:hover { transform: scale(1.2); }
+
+/* ─── Search bar ────────────────────────────────────────────── */
+.ec-search { position: relative; max-width: 480px; }
+.ec-search input {
+  background: var(--ec-surface);
+  border: 1px solid var(--ec-border);
+  border-radius: 50px;
+  color: var(--ec-text);
+  padding: 0.65rem 1.2rem 0.65rem 2.8rem;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-size: 0.95rem;
+}
+.ec-search input:focus {
+  outline: none;
+  border-color: var(--ec-gold);
+  box-shadow: 0 0 0 3px rgba(232, 168, 56, 0.15);
+  background: var(--ec-surface-2);
+}
+.ec-search input::placeholder { color: var(--ec-muted); }
+.ec-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ec-muted);
+  pointer-events: none;
+}
+
+/* ─── Buttons ───────────────────────────────────────────────── */
+.ec-btn {
+  background: var(--ec-gold);
+  color: #1C1C2E;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+}
+.ec-btn:hover {
+  background: var(--ec-gold-hover);
+  color: #1C1C2E;
+  transform: translateY(-1px);
+}
+.ec-btn-outline {
+  background: transparent;
+  border: 1px solid var(--ec-border);
+  color: var(--ec-text);
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+}
+.ec-btn-outline:hover { border-color: var(--ec-gold); color: var(--ec-gold); }
+.ec-btn-danger {
+  background: transparent;
+  border: 1px solid rgba(255, 80, 80, 0.4);
+  color: #ff5050;
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+}
+.ec-btn-danger:hover { background: rgba(255, 80, 80, 0.1); color: #ff5050; }
+
+/* ─── Forms ─────────────────────────────────────────────────── */
+.ec-form .form-control,
+.ec-form .form-select {
+  background: var(--ec-surface);
+  border: 1px solid var(--ec-border);
+  color: var(--ec-text);
+  border-radius: 8px;
+}
+.ec-form .form-control:focus,
+.ec-form .form-select:focus {
+  background: var(--ec-surface-2);
+  border-color: var(--ec-gold);
+  box-shadow: 0 0 0 3px rgba(232, 168, 56, 0.15);
+  color: var(--ec-text);
+}
+.ec-form label { color: var(--ec-muted); font-size: 0.9rem; font-weight: 500; }
+
+/* ─── Detail page ───────────────────────────────────────────── */
+.ec-detail-hero {
+  background: var(--ec-surface);
+  border: 1px solid var(--ec-border);
+  border-radius: var(--ec-radius);
+  padding: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ─── Alerts ─────────────────────────────────────────────────── */
+.alert {
+  background: var(--ec-surface);
+  border: 1px solid var(--ec-border);
+  color: var(--ec-text);
+  border-radius: 10px;
+}
+.alert-success { border-color: rgba(50, 200, 100, 0.4); }
+.alert-danger, .alert-error { border-color: rgba(255, 80, 80, 0.4); }
+
+/* ─── Footer ─────────────────────────────────────────────────── */
+.ec-footer {
+  border-top: 1px solid var(--ec-border);
+  padding: 2rem 0;
+  color: var(--ec-muted);
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: 4rem;
+}
+
+/* ─── Utilities ──────────────────────────────────────────────── */
+.text-gold { color: var(--ec-gold); }
+.text-muted-ec { color: var(--ec-muted); }
+.bg-surface { background: var(--ec-surface); }
+
+/* ─── Responsive tweaks ──────────────────────────────────────── */
+@media (max-width: 576px) {
+  .ec-hero { padding: 3rem 0 2rem; }
+  .ec-hero h1 { font-size: 2.2rem; }
+  .ec-stats { gap: 1.5rem; }
 }
