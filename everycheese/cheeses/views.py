@@ -1,80 +1,222 @@
-from typing import Any
-from django.views.generic import ListView, DetailView, DeleteView, TemplateView, UpdateView
-from .models import Cheese
-from django.urls import reverse_lazy
+"""
+Views for the EveryCheese cheese catalogue.
+
+Author: Sai Saketh Gooty Kase
+"""
+
+import json
 import logging
-from django.views.generic import CreateView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, DetailView
-from .models import Cheese, Rating
-from django.views.generic import CreateView, UpdateView, DeleteView
+
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Avg, Q
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-import logging  # Import the logging module
+from django.views import View
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    UpdateView,
+)
+
+from .models import Cheese, Rating
 
 log = logging.getLogger(__name__)
 
+
+# ---------------------------------------------------------------------------
+# Mixins
+# ---------------------------------------------------------------------------
+
+
+class CreatorRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """Allow access only to the cheese's creator."""
+
+    def test_func(self) -> bool:
+        cheese = get_object_or_404(Cheese, slug=self.kwargs["slug"])
+        return (
+            cheese.creator == self.request.user
+            or self.request.user.is_staff
+        )
+
+
+# ---------------------------------------------------------------------------
+# Cheese CRUD views
+# ---------------------------------------------------------------------------
+
+
 class CheeseListView(ListView):
-    model = Cheese
+    """Paginated, searchable list of all cheeses."""
 
-class CheeseDetailView(DetailView):
     model = Cheese
+    paginate_by = 12
 
-class CheeseCreateView(LoginRequiredMixin, CreateView):
-    model = Cheese
-    fields = ['name', 'description', 'firmness',
-                'country_of_origin']
-    def form_valid(self, form):
-        form.instance.creator = self.request.user
-        return super().form_valid(form)
-
-class CheeseDeleteView(DeleteView):
-    model = Cheese
-    template_name ='cheeses/cheese_delete.html'
-    success_url = reverse_lazy('cheeses:list')
-
-class ConfirmCheeseDeleteView(TemplateView):
-    template_name = 'cheeses/cheese_delete.html'
+    def get_queryset(self):
+        qs = (
+            Cheese.objects.select_related("creator")
+            .annotate(avg_score=Avg("ratings__score"))
+            .order_by("name")
+        )
+        query = self.request.GET.get("q", "").strip()
+        firmness = self.request.GET.get("firmness", "").strip()
+        if query:
+            qs = qs.filter(
+                Q(name__icontains=query) | Q(description__icontains=query)
+            )
+        if firmness:
+            qs = qs.filter(firmness=firmness)
+        return qs
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['cheese'] = Cheese.objects.get(slug=self.kwargs['slug'])
-        return context
-    
-class CheeseUpdateView(LoginRequiredMixin, UpdateView):
+        ctx = super().get_context_data(**kwargs)
+        ctx["query"] = self.request.GET.get("q", "")
+        ctx["selected_firmness"] = self.request.GET.get("firmness", "")
+        ctx["firmness_choices"] = Cheese.Firmness.choices
+        return ctx
+
+
+class CheeseDetailView(DetailView):
+    """Cheese detail with aggregated rating and current-user's rating."""
+
     model = Cheese
-    fields = [
-    'name',
-    'description',
-    'firmness',
-    'country_of_origin'
-    ]
-    
+
+    def get_queryset(self):
+        return Cheese.objects.select_related("creator").annotate(
+            avg_score=Avg("ratings__score")
+        )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        user = self.request.user
+        ctx["user_rating"] = 0
+        if user.is_authenticated:
+            rating = Rating.objects.filter(
+                creator=user, cheese=self.object
+            ).first()
+            ctx["user_rating"] = rating.score if rating else 0
+        ctx["rating_range"] = range(1, 6)
+        return ctx
+
+
+class CheeseCreateView(LoginRequiredMixin, CreateView):
+    """Create a new cheese entry. Only accessible to authenticated users."""
+
+    model = Cheese
+    fields = ["name", "description", "firmness", "country_of_origin"]
+    action = "Add"
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        messages.success(
+            self.request,
+            f'"{form.instance.name}" has been added to the index!',
+        )
+        log.info(
+            "Cheese created: %s by %s",
+            form.instance.name,
+            self.request.user.username,
+        )
+        return super().form_valid(form)
+
+
+class CheeseUpdateView(CreatorRequiredMixin, UpdateView):
+    """
+    Update cheese details. Restricted to the original creator or staff.
+    Also persists the user's rating on the same POST.
+    """
+
+    model = Cheese
+    fields = ["name", "description", "firmness", "country_of_origin"]
     action = "Update"
 
     def get_context_data(self, **kwargs):
-        ctx = super(CheeseUpdateView, self).get_context_data(**kwargs)
-        _slug = self.kwargs.get("slug")
-        ch = Cheese.objects.all().filter(slug = _slug).first()
-
-        if ch ==None:
-            ctx["rating"] =0
-            return
-        r = Rating.objects.all().filter(creator = self.request.user, cheese = ch).first()
-
-        if r != None:
-            ctx["rating"] = r.i_rating
-        else:
-            ctx["rating"] = 0
+        ctx = super().get_context_data(**kwargs)
+        rating = Rating.objects.filter(
+            creator=self.request.user, cheese=self.object
+        ).first()
+        ctx["user_rating"] = rating.score if rating else 0
+        ctx["rating_range"] = range(1, 6)
         return ctx
+
     def form_valid(self, form):
-        # Get the cheese being updated
-        cheese = self.object
+        raw = self.request.POST.get("rating", "0")
+        try:
+            score = max(0, min(5, int(raw)))
+        except (TypeError, ValueError):
+            score = 0
 
-        # Get or create the rating for the current user and cheese
-        rating, created = Rating.objects.get_or_create(creator=self.request.user, cheese=cheese)
-
-        # Update the rating value based on the form data
-        rating.i_rating = int(self.request.POST.get('rating'))  # Safely retrieve the rating value
-        rating.save()
-
+        if score > 0:
+            Rating.objects.update_or_create(
+                creator=self.request.user,
+                cheese=self.object,
+                defaults={"score": score},
+            )
+        messages.success(self.request, "Cheese updated successfully.")
         return super().form_valid(form)
+
+
+class CheeseDeleteView(CreatorRequiredMixin, DeleteView):
+    """Delete a cheese. Restricted to creator or staff only."""
+
+    model = Cheese
+    success_url = reverse_lazy("cheeses:list")
+
+    def form_valid(self, form):
+        name = self.object.name
+        messages.success(self.request, f'"{name}" has been removed.')
+        log.info(
+            "Cheese deleted: %s by %s",
+            name,
+            self.request.user.username,
+        )
+        return super().form_valid(form)
+
+
+# ---------------------------------------------------------------------------
+# AJAX rating endpoint
+# ---------------------------------------------------------------------------
+
+
+class RateCheeseView(LoginRequiredMixin, View):
+    """
+    Accept a POST with {"score": 1-5} and upsert the rating.
+    Returns JSON with the new average.
+    """
+
+    def post(self, request, slug: str):
+        cheese = get_object_or_404(Cheese, slug=slug)
+        try:
+            payload = json.loads(request.body)
+            score = int(payload.get("score", 0))
+        except (json.JSONDecodeError, TypeError, ValueError):
+            return JsonResponse(
+                {"error": "Invalid payload. Expected {'score': 1-5}."},
+                status=400,
+            )
+
+        if not 1 <= score <= 5:
+            return JsonResponse(
+                {"error": "Score must be between 1 and 5."},
+                status=400,
+            )
+
+        Rating.objects.update_or_create(
+            creator=request.user,
+            cheese=cheese,
+            defaults={"score": score},
+        )
+
+        new_avg = cheese.average_rating
+        log.debug(
+            "Rating upserted: cheese=%s user=%s score=%d avg=%.1f",
+            cheese.slug,
+            request.user.username,
+            score,
+            new_avg,
+        )
+        return JsonResponse(
+            {"average": new_avg, "user_score": score}, status=200
+        )
